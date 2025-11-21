@@ -1,5 +1,4 @@
 'use client';
-import './globals.css';
 import React, { useState } from 'react';
 
 interface Category {
@@ -8,7 +7,7 @@ interface Category {
 }
 
 function App() {
-  const [exchangeRate, setExchangeRate] = useState<number>(4.97); // Default RON per EUR
+  const [exchangeRate, setExchangeRate] = useState<number>(4.97);
   const [categories, setCategories] = useState<Category[]>([
     { name: 'Groceries', expenses: [] },
     { name: 'Eating Out', expenses: [] },
@@ -48,6 +47,44 @@ function App() {
     setCategories(updatedCategories);
   };
 
+  const handleAddExpenseClick = (categoryIndex: number) => {
+    const input = document.getElementById(`expense-${categoryIndex}`) as HTMLInputElement | null;
+    const checkbox = document.getElementById(`split-${categoryIndex}`) as HTMLInputElement | null;
+
+    if (!input) return;
+
+    let amount = parseFloat(input.value);
+    if (checkbox?.checked) {
+      amount = amount / 2;
+    }
+
+    addExpense(categoryIndex, amount);
+    input.value = '';
+  };
+
+  const handleExpenseKeyDown = (
+    e: React.KeyboardEvent<HTMLInputElement>,
+    categoryIndex: number
+  ) => {
+    if (e.key === 'Enter') {
+      handleAddExpenseClick(categoryIndex);
+    }
+  };
+
+  const handleExchangeRateChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setExchangeRate(parseFloat(e.target.value));
+  };
+
+  const handleNewCategoryChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setNewCategoryName(e.target.value);
+  };
+
+  const handleNewCategoryKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === 'Enter') {
+      addCategory();
+    }
+  };
+
   const calculateCategorySumRON = (expenses: number[]): number => {
     return expenses.reduce((sum, exp) => sum + exp, 0);
   };
@@ -57,116 +94,261 @@ function App() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-gray-100 p-4">
-      <div className="max-w-6xl mx-auto bg-white shadow-2xl rounded-2xl p-4">
-        <h1 className="text-2xl font-extrabold text-gray-900 mb-4 tracking-tight">
+    <div
+      style={{
+        minHeight: '100vh',
+        background: 'linear-gradient(to bottom right, #eff6ff, #f3f4f6)',
+        padding: '1rem',
+      }}
+    >
+      <div
+        style={{
+          maxWidth: '72rem',
+          margin: '0 auto',
+          background: 'white',
+          boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.25)',
+          borderRadius: '1rem',
+          padding: '1rem',
+        }}
+      >
+        <h1
+          style={{
+            fontSize: '1.5rem',
+            fontWeight: '800',
+            color: '#111827',
+            marginBottom: '1rem',
+            letterSpacing: '-0.025em',
+          }}
+        >
           Monthly Expenses Calculator
         </h1>
 
-        <div className="mb-4">
-          <label className="block text-xs font-semibold text-gray-900 mb-1">
+        <div style={{ marginBottom: '1rem' }}>
+          <label
+            style={{
+              display: 'block',
+              fontSize: '0.75rem',
+              fontWeight: '600',
+              color: '#111827',
+              marginBottom: '0.25rem',
+            }}
+          >
             Exchange Rate (RON per EUR):
           </label>
           <input
             type="number"
             value={exchangeRate}
-            onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
-              setExchangeRate(parseFloat(e.target.value))
-            }
+            onChange={handleExchangeRateChange}
             step="0.01"
             min="0"
-            className="w-full border border-gray-300 rounded-lg p-2 focus:outline-none focus:ring-2 focus:ring-blue-500 transition duration-200 text-gray-900"
+            style={{
+              width: '100%',
+              border: '1px solid #d1d5db',
+              borderRadius: '0.5rem',
+              padding: '0.5rem',
+              color: '#111827',
+              outline: 'none',
+            }}
           />
         </div>
 
-        <div className="mb-4">
-          <label className="block text-xs font-semibold text-gray-900 mb-1">
+        <div style={{ marginBottom: '1rem' }}>
+          <label
+            style={{
+              display: 'block',
+              fontSize: '0.75rem',
+              fontWeight: '600',
+              color: '#111827',
+              marginBottom: '0.25rem',
+            }}
+          >
             Add New Category:
           </label>
-          <div className="flex">
+          <div style={{ display: 'flex' }}>
             <input
               type="text"
               value={newCategoryName}
-              onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
-                setNewCategoryName(e.target.value)
-              }
-              onKeyDown={(e: React.KeyboardEvent<HTMLInputElement>) => {
-                if (e.key === 'Enter') {
-                  addCategory();
-                }
+              onChange={handleNewCategoryChange}
+              onKeyDown={handleNewCategoryKeyDown}
+              style={{
+                flexGrow: 1,
+                border: '1px solid #d1d5db',
+                borderRadius: '0.5rem',
+                padding: '0.5rem',
+                marginRight: '0.5rem',
+                color: '#111827',
+                outline: 'none',
               }}
-              className="flex-grow border border-gray-300 rounded-lg p-2 mr-2 focus:outline-none focus:ring-2 focus:ring-blue-500 transition duration-200 text-gray-900"
             />
             <button
               onClick={addCategory}
-              className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition duration-200 font-medium"
+              style={{
+                background: '#2563eb',
+                color: 'white',
+                padding: '0.5rem 1rem',
+                borderRadius: '0.5rem',
+                border: 'none',
+                cursor: 'pointer',
+                fontWeight: '500',
+              }}
             >
               Add
             </button>
           </div>
         </div>
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+        <div
+          style={{
+            display: 'grid',
+            gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))',
+            gap: '1rem',
+          }}
+        >
           {categories.map((category, index) => (
-            <div key={index} className="bg-gray-50 border border-gray-200 rounded-xl p-4 relative">
-              <div className="flex justify-between items-center mb-2">
-                <h3 className="text-lg font-bold text-gray-900">{category.name}</h3>
+            <div
+              key={index}
+              style={{
+                background: '#f9fafb',
+                border: '1px solid #e5e7eb',
+                borderRadius: '0.75rem',
+                padding: '1rem',
+                position: 'relative',
+              }}
+            >
+              <div
+                style={{
+                  display: 'flex',
+                  justifyContent: 'space-between',
+                  alignItems: 'center',
+                  marginBottom: '0.5rem',
+                }}
+              >
+                <h3
+                  style={{
+                    fontSize: '1.125rem',
+                    fontWeight: '700',
+                    color: '#111827',
+                  }}
+                >
+                  {category.name}
+                </h3>
                 <button
                   onClick={() => removeCategory(index)}
-                  className="text-red-600 hover:text-red-800 transition duration-200 font-medium text-xs"
+                  style={{
+                    color: '#dc2626',
+                    background: 'none',
+                    border: 'none',
+                    cursor: 'pointer',
+                    fontWeight: '500',
+                    fontSize: '0.75rem',
+                  }}
                 >
                   X
                 </button>
               </div>
 
-              <div className="mb-2">
-                <label className="block text-xs font-semibold text-gray-900 mb-1">
+              <div style={{ marginBottom: '0.5rem' }}>
+                <label
+                  style={{
+                    display: 'block',
+                    fontSize: '0.75rem',
+                    fontWeight: '600',
+                    color: '#111827',
+                    marginBottom: '0.25rem',
+                  }}
+                >
                   Add Expense (RON):
                 </label>
-                <div className="flex">
+                <div style={{ display: 'flex', marginBottom: '0.5rem' }}>
                   <input
                     type="number"
                     id={`expense-${index}`}
                     step="0.01"
                     min="0"
-                    onKeyDown={(e: React.KeyboardEvent<HTMLInputElement>) => {
-                      if (e.key === 'Enter') {
-                        const input = e.target as HTMLInputElement;
-                        const amount = parseFloat(input.value);
-                        addExpense(index, amount);
-                        input.value = '';
-                      }
+                    onKeyDown={e => handleExpenseKeyDown(e, index)}
+                    style={{
+                      flexGrow: 1,
+                      border: '1px solid #d1d5db',
+                      borderRadius: '0.5rem',
+                      padding: '0.5rem',
+                      marginRight: '0.5rem',
+                      color: '#111827',
+                      outline: 'none',
                     }}
-                    className="flex-grow border border-gray-300 rounded-lg p-2 mr-2 focus:outline-none focus:ring-2 focus:ring-green-500 transition duration-200 text-gray-900"
                   />
                   <button
-                    onClick={() => {
-                      const input = document.getElementById(
-                        `expense-${index}`
-                      ) as HTMLInputElement | null;
-                      if (input) {
-                        const amount = parseFloat(input.value);
-                        addExpense(index, amount);
-                        input.value = '';
-                      }
+                    onClick={() => handleAddExpenseClick(index)}
+                    style={{
+                      background: '#16a34a',
+                      color: 'white',
+                      padding: '0.5rem 1rem',
+                      borderRadius: '0.5rem',
+                      border: 'none',
+                      cursor: 'pointer',
+                      fontWeight: '500',
                     }}
-                    className="bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 transition duration-200 font-medium"
                   >
                     Add
                   </button>
                 </div>
+                <div style={{ display: 'flex', alignItems: 'center' }}>
+                  <input
+                    type="checkbox"
+                    id={`split-${index}`}
+                    style={{
+                      marginRight: '0.5rem',
+                      height: '1rem',
+                      width: '1rem',
+                      cursor: 'pointer',
+                    }}
+                  />
+                  <label
+                    htmlFor={`split-${index}`}
+                    style={{
+                      fontSize: '0.75rem',
+                      color: '#111827',
+                      cursor: 'pointer',
+                    }}
+                  >
+                    Split (divide by 2)
+                  </label>
+                </div>
               </div>
 
-              <ul className="space-y-1 mb-2">
+              <ul
+                style={{
+                  listStyle: 'none',
+                  padding: 0,
+                  margin: '0 0 0.5rem 0',
+                }}
+              >
                 {category.expenses.map((exp, expIndex) => (
                   <li
                     key={expIndex}
-                    className="flex justify-between items-center bg-white border border-gray-200 rounded-lg p-2 shadow-sm text-sm"
+                    style={{
+                      display: 'flex',
+                      justifyContent: 'space-between',
+                      alignItems: 'center',
+                      background: 'white',
+                      border: '1px solid #e5e7eb',
+                      borderRadius: '0.5rem',
+                      padding: '0.5rem',
+                      boxShadow: '0 1px 2px 0 rgba(0, 0, 0, 0.05)',
+                      fontSize: '0.875rem',
+                      marginBottom: '0.25rem',
+                    }}
                   >
-                    <span className="text-gray-900">{exp.toFixed(2)} RON</span>
+                    <span style={{ color: '#111827' }}>{exp.toFixed(2)} RON</span>
                     <button
                       onClick={() => removeExpense(index, expIndex)}
-                      className="text-red-600 hover:text-red-800 transition duration-200 font-medium text-xs"
+                      style={{
+                        color: '#dc2626',
+                        background: 'none',
+                        border: 'none',
+                        cursor: 'pointer',
+                        fontWeight: '500',
+                        fontSize: '0.75rem',
+                      }}
                     >
                       Remove
                     </button>
@@ -174,11 +356,18 @@ function App() {
                 ))}
               </ul>
 
-              <div className="grid grid-cols-2 gap-2 text-sm">
-                <p className="font-bold text-gray-900">
+              <div
+                style={{
+                  display: 'grid',
+                  gridTemplateColumns: '1fr 1fr',
+                  gap: '0.5rem',
+                  fontSize: '0.875rem',
+                }}
+              >
+                <p style={{ fontWeight: '700', color: '#111827', margin: 0 }}>
                   RON: {calculateCategorySumRON(category.expenses).toFixed(2)}
                 </p>
-                <p className="font-bold text-gray-900">
+                <p style={{ fontWeight: '700', color: '#111827', margin: 0 }}>
                   EUR: {calculateCategorySumEUR(calculateCategorySumRON(category.expenses))}
                 </p>
               </div>
